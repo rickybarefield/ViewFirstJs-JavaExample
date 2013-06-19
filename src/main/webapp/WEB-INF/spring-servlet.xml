@@ -20,8 +20,8 @@
 		</mvc:argument-resolvers>
 	</mvc:annotation-driven>
     
-    	<mvc:resources mapping="*.html" location="/static/" />
-    	<mvc:resources mapping="/css/**" location="/css/" />
+    <mvc:resources mapping="*.html" location="/static/" />
+    <mvc:resources mapping="/css/**" location="/css/" />
 	<mvc:resources mapping="/js/**" location="/js/" />
 	
 	<bean
