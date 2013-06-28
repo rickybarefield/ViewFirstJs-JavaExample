@@ -1,0 +1,49 @@
+body {
+    
+ font-family: arial;   
+}
+
+thead {
+    
+    background-color: #77CC55;
+}
+
+tbody {
+ 
+  background-color: #CCDD55;   
+}
+
+td,th {
+
+ border: 2px solid black;
+ margin: 0px;
+ padding: 0px;
+}
+
+.date {
+
+ font-style: bold;
+ color: blue;
+ font-size: 0.8em;
+ display: block;
+ padding: 5px 0px 10px 5px;
+ border-bottom: 1px solid black;
+ margin-bottom: 10px;
+}
+
+.events {
+    
+    margin: 0px;
+    margin-bottom: 10px;
+    display: block;
+    padding: 10px;
+    
+}
+
+.event {
+ 
+    border: 1px solid black;   
+    padding: 10px;
+    margin: 5px;
+    font-size: 0.9em;
+}

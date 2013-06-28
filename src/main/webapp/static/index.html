@@ -4,9 +4,38 @@
   <head>
     <meta charset="UTF-8">
     <title>ViewFirstJs Java Example</title>
+
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
     <script data-main="js/ViewFirstApp" type="text/javascript" src="js/require.js"></script>
 
-    <script type="text/view-first-template" name="basicView">Here I am</script>
+    <script type="text/view-first-template" name="monthView">
+        <h2 data-snippet="month">January</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Sunday</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                </tr>
+            </thead>
+            <tbody data-snippet="calendar">
+                <tr>
+                    <td class="sunday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="monday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="tuesday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="wednesday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="thursday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="friday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="saturday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </script>
   </head>
   
   <body>
