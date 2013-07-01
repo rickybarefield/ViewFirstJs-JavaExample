@@ -101,7 +101,7 @@ require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
         currentDayOfWeek++
         currentDayOfMonth++
 
-      node.find("td").filter(-> return !$(this).data("populated")?).find(".events").html("")
+      node.find("td").filter(-> return !$(this).data("populated")?).addClass("unused").find(".events").html("")
 
 
     viewFirst.onNamedModelChange("startOfCurrentMonth", (oldDate, newDate) -> renderCalendar(newDate))

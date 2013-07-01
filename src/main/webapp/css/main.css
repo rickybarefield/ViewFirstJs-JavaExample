@@ -29,6 +29,11 @@ td,th {
  width: 100px;
 }
 
+td.unused {
+ 
+ background-color: black;   
+}
+
 .date {
 
  font-style: bold;

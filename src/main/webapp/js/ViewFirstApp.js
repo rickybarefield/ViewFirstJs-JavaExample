@@ -96,7 +96,7 @@
         }
         return node.find("td").filter(function() {
           return !($(this).data("populated") != null);
-        }).find(".events").html("");
+        }).addClass("unused").find(".events").html("");
       };
       viewFirst.onNamedModelChange("startOfCurrentMonth", function(oldDate, newDate) {
         return renderCalendar(newDate);
