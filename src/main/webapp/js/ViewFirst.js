@@ -1800,8 +1800,11 @@ define("underscore", (function (global) {
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             match = _ref[_i];
             key = removeSurround(match);
-            keys.push(key);
-            properties.push(model.findProperty(key));
+            property = model.findProperty(key);
+            if (property != null) {
+              keys.push(key);
+              properties.push(model.findProperty(key));
+            }
           }
           replaceOperation = function() {
             return replaceKeysInText(node, originalText, keys, properties);
@@ -2149,6 +2152,16 @@ define("underscore", (function (global) {
         return modelContainer.set(model);
       };
 
+      ViewFirst.prototype.getNamedModel = function(name) {
+        var modelContainer;
+        modelContainer = this.namedModels[name];
+        if (modelContainer != null) {
+          return modelContainer.model;
+        } else {
+          return null;
+        }
+      };
+
       ViewFirst.prototype.onNamedModelChange = function(name, func) {
         var modelContainer;
         if (this.namedModels[name] == null) {
@@ -2179,13 +2192,13 @@ define("underscore", (function (global) {
       ViewFirst.prototype.applySnippetsToSingleNodeAndChildren = function(node, parentsAttributes) {
         var nodeAfterSnippetApplied, parentsAndNodesAttributes, snippetFunc, snippetName;
         parentsAndNodesAttributes = this.combine(parentsAttributes, node.data());
-        snippetName = node.attr('data-snippet');
+        snippetName = node.data('snippet');
         if (snippetName != null) {
           snippetFunc = this.snippets[snippetName];
           if (snippetFunc == null) {
             throw "Unable to find snippet '" + snippetName + "'";
           }
-          node.removeAttr("data-snippet");
+          node.data("snippet", null);
           nodeAfterSnippetApplied = snippetFunc.call(this, node, parentsAndNodesAttributes);
           if (nodeAfterSnippetApplied === null) {
             return node.detach();

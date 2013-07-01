@@ -9,8 +9,29 @@
 
     <script data-main="js/ViewFirstApp" type="text/javascript" src="js/require.js"></script>
 
+
+    <script type="text/view-first-template" name="main">
+
+        <div id="rhs">
+            <div data-snippet="embed" data-view="createAppointment"></div>
+        </div>
+        <div id="lhs">
+            <div data-snippet="embed" data-view="monthView"></div>
+        </div>
+    </script>
+
+    <script type="text/view-first-template" name="createAppointment">
+        <h2>Create Appointment</h2>
+        <br /><br />
+        <form data-snippet="createAppointment">
+            Title: <input name="title" id="title" data-property="title" /> <br />
+            Date: <input name="date" id="date" data-property="date" /> <br />
+            <button>Create</button>
+        </form>
+    </script>
+
     <script type="text/view-first-template" name="monthView">
-        <h2 data-snippet="month">January</h2>
+        <button data-snippet="previousMonth"><<<</button><h2 data-snippet="calendarHeader">January 2013</h2><button data-snippet="nextMonth">>>></button>
         <table>
             <thead>
                 <tr>
@@ -25,13 +46,13 @@
             </thead>
             <tbody data-snippet="calendar">
                 <tr>
-                    <td class="sunday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
-                    <td class="monday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
-                    <td class="tuesday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
-                    <td class="wednesday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
-                    <td class="thursday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
-                    <td class="friday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
-                    <td class="saturday"><span class="date"></span><span class="events"><span class="event">#{description}</span></span></td>
+                    <td class="sunday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
+                    <td class="monday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
+                    <td class="tuesday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
+                    <td class="wednesday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
+                    <td class="thursday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
+                    <td class="friday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
+                    <td class="saturday" ><span class="date"></span><ul class="events"><li class="event">#{title}</li></ul></td>
                 </tr>
             </tbody>
         </table>

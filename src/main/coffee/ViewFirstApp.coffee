@@ -1,29 +1,87 @@
-require ["ViewFirst", "jquery"], (ViewFirst, $) ->
+require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
 
-  $ ->
+  viewFirst = new ViewFirst("monthView")
 
-    daysInMonth = (month, year) -> return new Date(year, month, 0).getDate();
+  #Create some appointments
 
-    monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
-    dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
-    date = new Date(2013, 2, 1)
+  goToTheDentist = new Appointment()
+  goToTheDentist.set("date", new Date(2013, 2, 5))
+  goToTheDentist.set("title", "Go to the dentist")
 
-    viewFirst = new ViewFirst("monthView")
+  date = new Date(2013, 3, 1)
 
-    viewFirst.addSnippet "month", (node) ->
-      node.html(monthNames[date.getMonth() - 1])
-      return node
+  viewFirst.setNamedModel("startOfCurrentMonth", date)
 
-    viewFirst.addSnippet "calendar", (node) ->
+  daysInMonth = (month, year) -> return new Date(year, month + 1, 0).getDate();
+
+  monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+  dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+
+  viewFirst.addSnippet "createAppointment", (node) ->
+
+    doBind = ->
+      newAppointment = new Appointment()
+      viewFirst.bindInputs node, newAppointment
+      return false
+
+    node.find("button").click(doBind)
+    doBind()
+
+    return node
+
+  viewFirst.addSnippet "previousMonth", (node) ->
+
+    node.click ->
+      currentDate = viewFirst.getNamedModel("startOfCurrentMonth")
+      newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+      viewFirst.setNamedModel("startOfCurrentMonth", newDate)
+
+    return node
+
+  viewFirst.addSnippet "nextMonth", (node) ->
+
+    node.click ->
+      currentDate = viewFirst.getNamedModel("startOfCurrentMonth")
+      newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+      viewFirst.setNamedModel("startOfCurrentMonth", newDate)
+
+    return node
+
+  viewFirst.addSnippet "calendarHeader", (node) ->
+
+    renderMonth = (startOfCurrentMonth) -> node.html(monthNames[startOfCurrentMonth.getMonth()] + " " + startOfCurrentMonth.getFullYear())
+
+    viewFirst.onNamedModelChange("startOfCurrentMonth", (oldDate, newDate) -> renderMonth(newDate))
+    renderMonth(viewFirst.getNamedModel("startOfCurrentMonth"))
+    return node
+
+  bindAppointments = (node, date) ->
+
+    eventTemplate = node.children()
+    eventTemplate.detach()
+
+    appointmentsForDay = Appointment.createCollection (appointment) ->
+       appDate = appointment.get("date")
+       return appDate? && appDate.getTime() == date.getTime()
+
+    viewFirst.bindCollection appointmentsForDay, node, ->
+      eventTemplate.clone()
 
 
-      daysInThisMonth = daysInMonth(date.getMonth(), date.getYear())
+  viewFirst.addSnippet "calendar", (node) ->
 
-      template = node.children()
-      template.detach()
+    template = node.children()
+    template.detach()
+
+    renderCalendar = (startOfCurrentMonth) ->
+
+      node.children().detach()
+
+      daysInThisMonth = daysInMonth(startOfCurrentMonth.getMonth(), startOfCurrentMonth.getFullYear())
+
       currentRow = template.clone()
       node.append(currentRow)
-      currentDayOfWeek = date.getDay()
+      currentDayOfWeek = startOfCurrentMonth.getDay()
       currentDayOfMonth = 1
 
       while currentDayOfMonth <= daysInThisMonth
@@ -34,15 +92,26 @@ require ["ViewFirst", "jquery"], (ViewFirst, $) ->
           node.append(currentRow)
 
         dayName = dayNames[currentDayOfWeek]
-        currentRow.find(".#{dayName} .date").html("<span>#{currentDayOfMonth}</span>")
+        cell = currentRow.find(".#{dayName}")
+        $(cell.get(0)).data("populated", true)
+        appointmentsSpan = cell.find(".events")
+        bindAppointments(appointmentsSpan, new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth))
+        cell.find(".date").html("<span>#{currentDayOfMonth}</span>")
 
         currentDayOfWeek++
         currentDayOfMonth++
 
-      return node
+      node.find("td").filter(-> return !$(this).data("populated")?).find(".events").html("")
 
+
+    viewFirst.onNamedModelChange("startOfCurrentMonth", (oldDate, newDate) -> renderCalendar(newDate))
+    renderCalendar(viewFirst.getNamedModel("startOfCurrentMonth"))
+
+    return node
+
+  $ ->
 
     viewFirst.initialize()
 
     #Until routing is working...
-    viewFirst.render("monthView")
+    viewFirst.render("main")

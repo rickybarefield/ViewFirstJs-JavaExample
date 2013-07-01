@@ -3,6 +3,14 @@ body {
  font-family: arial;   
 }
 
+#rhs {
+
+  float: right;
+  width: 350px;
+  margin-right: 200px;
+  margin-top : 100px;
+}
+
 thead {
     
     background-color: #77CC55;
@@ -18,6 +26,7 @@ td,th {
  border: 2px solid black;
  margin: 0px;
  padding: 0px;
+ width: 100px;
 }
 
 .date {
@@ -26,15 +35,13 @@ td,th {
  color: blue;
  font-size: 0.8em;
  display: block;
- padding: 5px 0px 10px 5px;
  border-bottom: 1px solid black;
  margin-bottom: 10px;
+ height : 14px;
 }
 
 .events {
     
-    margin: 0px;
-    margin-bottom: 10px;
     display: block;
     padding: 10px;
     
@@ -42,8 +49,12 @@ td,th {
 
 .event {
  
-    border: 1px solid black;   
-    padding: 10px;
-    margin: 5px;
-    font-size: 0.9em;
+    font-size: 0.7em;
+    list-style-type: none;
+}
+
+h2, button {
+    
+    display: inline;
+    margin: 20px;
 }
