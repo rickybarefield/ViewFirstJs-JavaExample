@@ -14,14 +14,18 @@
     monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
     viewFirst.addSnippet("createAppointment", function(node) {
-      var doBind;
+      var currentAppointment, doBind;
+      currentAppointment = new Appointment();
       doBind = function() {
-        var newAppointment;
-        newAppointment = new Appointment();
-        viewFirst.bindInputs(node, newAppointment);
-        return false;
+        return viewFirst.bindInputs(node, currentAppointment);
       };
-      node.find("button").click(doBind);
+      node.find("button").click(function(event) {
+        event.preventDefault();
+        currentAppointment.save();
+        currentAppointment = new Appointment();
+        doBind();
+        return false;
+      });
       doBind();
       return node;
     });

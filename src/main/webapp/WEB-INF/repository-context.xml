@@ -26,6 +26,6 @@
 
 	<jdbc:embedded-database id="dataSource" type="HSQL" />
 	
-    <jpa:repositories base-package="com.appagility.viewfirstjs.java.repository" />
+    <jpa:repositories base-package="com.appagility.viewfirstjs.java.repositories" />
 
 </beans>

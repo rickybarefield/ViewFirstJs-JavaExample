@@ -19,12 +19,17 @@ require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
 
   viewFirst.addSnippet "createAppointment", (node) ->
 
-    doBind = ->
-      newAppointment = new Appointment()
-      viewFirst.bindInputs node, newAppointment
+    currentAppointment = new Appointment()
+
+    doBind = -> viewFirst.bindInputs node, currentAppointment
+
+    node.find("button").click (event) ->
+      event.preventDefault()
+      currentAppointment.save()
+      currentAppointment = new Appointment()
+      doBind()
       return false
 
-    node.find("button").click(doBind)
     doBind()
 
     return node
@@ -102,7 +107,6 @@ require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
         currentDayOfMonth++
 
       node.find("td").filter(-> return !$(this).data("populated")?).addClass("unused").find(".events").html("")
-
 
     viewFirst.onNamedModelChange("startOfCurrentMonth", (oldDate, newDate) -> renderCalendar(newDate))
     renderCalendar(viewFirst.getNamedModel("startOfCurrentMonth"))
