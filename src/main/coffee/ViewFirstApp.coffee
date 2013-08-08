@@ -1,4 +1,4 @@
-require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
+require ["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], ($, JQueryAtmoshphere, ViewFirst, Appointment) ->
 
   viewFirst = new ViewFirst("monthView")
 
@@ -16,6 +16,9 @@ require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
 
   monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
   dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+
+  allAppointments = Appointment.createCollection()
+  allAppointments.activate()
 
   viewFirst.addSnippet "createAppointment", (node) ->
 
@@ -65,7 +68,7 @@ require ["ViewFirst", "jquery", "Appointment"], (ViewFirst, $, Appointment) ->
     eventTemplate = node.children()
     eventTemplate.detach()
 
-    appointmentsForDay = Appointment.createCollection (appointment) ->
+    appointmentsForDay = allAppointments.filter (appointment) ->
        appDate = appointment.get("date")
        return appDate? && appDate.getTime() == date.getTime()
 

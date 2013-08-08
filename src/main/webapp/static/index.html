@@ -7,7 +7,17 @@
 
     <link rel="stylesheet" type="text/css" href="css/main.css">
 
-    <script data-main="js/ViewFirstApp" type="text/javascript" src="js/require.js"></script>
+  <script type="text/javascript" src="js/require.js"></script>
+
+  <script type="text/javascript">
+        require.config({
+            "baseUrl": "js",
+            "shim": {
+                "jquery.atmosphere": ["jquery"]
+            }
+        });
+        requirejs( ["ViewFirstApp"]);
+    </script>
 
 
     <script type="text/view-first-template" name="main">

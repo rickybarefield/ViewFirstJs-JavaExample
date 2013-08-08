@@ -1,7 +1,7 @@
 (function() {
 
-  require(["ViewFirst", "jquery", "Appointment"], function(ViewFirst, $, Appointment) {
-    var bindAppointments, date, dayNames, daysInMonth, goToTheDentist, monthNames, viewFirst;
+  require(["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], function($, JQueryAtmoshphere, ViewFirst, Appointment) {
+    var allAppointments, bindAppointments, date, dayNames, daysInMonth, goToTheDentist, monthNames, viewFirst;
     viewFirst = new ViewFirst("monthView");
     goToTheDentist = new Appointment();
     goToTheDentist.set("date", new Date(2013, 2, 5));
@@ -13,6 +13,8 @@
     };
     monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    allAppointments = Appointment.createCollection();
+    allAppointments.activate();
     viewFirst.addSnippet("createAppointment", function(node) {
       var currentAppointment, doBind;
       currentAppointment = new Appointment();
@@ -62,7 +64,7 @@
       var appointmentsForDay, eventTemplate;
       eventTemplate = node.children();
       eventTemplate.detach();
-      appointmentsForDay = Appointment.createCollection(function(appointment) {
+      appointmentsForDay = allAppointments.filter(function(appointment) {
         var appDate;
         appDate = appointment.get("date");
         return (appDate != null) && appDate.getTime() === date.getTime();
