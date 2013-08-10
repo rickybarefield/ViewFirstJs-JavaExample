@@ -1,10 +1,14 @@
 package com.appagility.viewfirstjs.java.model;
 
+import com.appagility.viewfirstjs.java.model.listeners.BroadcastEntityListener;
+
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import java.io.Serializable;
 import java.util.Date;
 
 @Entity
+@EntityListeners(BroadcastEntityListener.class)
 public class Appointment extends Identifiable
 {
     private String title;

@@ -15,31 +15,30 @@
  */
 package com.appagility.viewfirstjs.java.atmosphere;
 
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 /**
  * Customized Jackson {@link ObjectMapper} to add:
- * <p/>
+ *
  * <ol>
- * <li>Jaxb annoation support using the {@link JaxbAnnotationIntrospector}</li>
- * <li>Type Information to the generated JSON</li>
+ *     <li>Jaxb annoation support using the {@link JaxbAnnotationIntrospector}</li>
+ *     <li>Type Information to the generated JSON</li>
  * </ol>
  * .
- *
  * @author Gunnar Hillert
  * @since 1.0.0
+ *
  */
-public class JaxbJacksonObjectMapper extends ObjectMapper
-{
+public class JaxbJacksonObjectMapper extends ObjectMapper {
 
-    public JaxbJacksonObjectMapper()
-    {
-        final AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
-        getDeserializationConfig().withAnnotationIntrospector(introspector);
-        getSerializationConfig().withAnnotationIntrospector(introspector);
-    }
+	public JaxbJacksonObjectMapper() {
+		final AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
+		super.getDeserializationConfig().withAnnotationIntrospector(introspector);
+		super.getSerializationConfig().withAnnotationIntrospector(introspector);
+
+		//this.enableDefaultTypingAsProperty(DefaultTyping.JAVA_LANG_OBJECT, JsonTypeInfo.Id.CLASS.getDefaultPropertyName());
+	}
 
 }

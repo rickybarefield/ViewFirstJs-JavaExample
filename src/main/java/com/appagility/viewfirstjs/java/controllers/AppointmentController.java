@@ -1,12 +1,17 @@
 package com.appagility.viewfirstjs.java.controllers;
 
+import com.appagility.viewfirstjs.java.atmosphere.AtmosphereUtils;
 import com.appagility.viewfirstjs.java.model.Appointment;
 import com.appagility.viewfirstjs.java.repositories.AppointmentRepository;
 import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -22,6 +27,14 @@ public class AppointmentController
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    private Broadcaster appointmentBroadcaster;
+
+    @PostConstruct
+    public void createBroadcaster() {
+
+        appointmentBroadcaster = BroadcasterFactory.getDefault().lookup("appointment-broadcaster", true);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/appointments/{id}")
 	public @ResponseBody Appointment get(@PathVariable Long id)
 	{
@@ -31,6 +44,9 @@ public class AppointmentController
 	@RequestMapping(method = RequestMethod.GET, value = "/appointments")
 	public @ResponseBody Iterable<Appointment> getAll(final AtmosphereResource atmosphereResource)
 	{
+        AtmosphereUtils.suspend(atmosphereResource);
+        appointmentBroadcaster.addAtmosphereResource(atmosphereResource);
+
         return appointmentRepository.findAll();
 	}
 

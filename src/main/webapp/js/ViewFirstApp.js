@@ -6,6 +6,7 @@
     goToTheDentist = new Appointment();
     goToTheDentist.set("date", new Date(2013, 2, 5));
     goToTheDentist.set("title", "Go to the dentist");
+    goToTheDentist.save();
     date = new Date(2013, 3, 1);
     viewFirst.setNamedModel("startOfCurrentMonth", date);
     daysInMonth = function(month, year) {

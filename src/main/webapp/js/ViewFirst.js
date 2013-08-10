@@ -1393,10 +1393,7 @@ define("underscore", (function (global) {
         This class provides the glue between ViewFirst models and the server, it could be swapped out for another implementation.  It should not have knowledge of the rest of the ViewFirst framework.
     */
 
-    var AtmosphereSynchronization, successfulSave;
-    successfulSave = function(jsonString, func) {
-      return func($.parseJSON(jsonString));
-    };
+    var AtmosphereSynchronization;
     AtmosphereSynchronization = {
       connectCollection: function(url, callbackFunctions) {
         var request, subSocket;
@@ -1410,9 +1407,16 @@ define("underscore", (function (global) {
           transport: 'websocket'
         };
         request.onMessage = function(response) {
-          var message;
-          message = $.parseJSON(response);
-          if (message.event != null) {
+          var message, model, _i, _len, _results;
+          message = $.parseJSON(response.responseBody);
+          if (Array.isArray(message)) {
+            _results = [];
+            for (_i = 0, _len = message.length; _i < _len; _i++) {
+              model = message[_i];
+              _results.push(callbackFunctions['create'](model));
+            }
+            return _results;
+          } else if (message.event != null) {
             switch (message.event) {
               case "CREATE":
                 return callbackFunctions['create'](message.entity);
@@ -1426,7 +1430,7 @@ define("underscore", (function (global) {
                 return console.error("Unknown event '" + message.event + "', silently ignoring");
             }
           } else {
-            return callbackFunctions['create'](message.entity);
+            return callbackFunctions['create'](message);
           }
         };
         request.onError = function(response) {
@@ -1436,20 +1440,18 @@ define("underscore", (function (global) {
       },
       persist: function(url, json, callbackFunctions) {
         return $.ajax(url, {
-          type: 'PUT',
+          type: 'POST',
           data: json,
-          success: function(jsonString) {
-            return successfulSave(jsonString, callbackFunctions['success']);
-          }
+          contentType: "application/json",
+          success: callbackFunctions['success']
         });
       },
       update: function(url, json, callbackFunctions) {
         return $.ajax(url, {
-          type: 'POST',
+          type: 'PUT',
           data: json,
-          success: function(jsonString) {
-            return successfulSave(jsonString, callbackFunctions['success']);
-          }
+          contentType: "application/json",
+          success: callbackFunctions['success']
         });
       }
     };
@@ -1465,16 +1467,32 @@ define("underscore", (function (global) {
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   define('ViewFirstModel',["underscore", "jquery", "Property", "ViewFirstEvents", "AtmosphereSynchronization"], function(_, $, Property, Events, Sync) {
-    var ClientFilteredCollection, Model, ServerSynchronisedCollection;
-    ClientFilteredCollection = (function(_super) {
+    var ClientFilteredCollection, Collection, Model, ServerSynchronisedCollection;
+    Collection = (function(_super) {
 
-      __extends(ClientFilteredCollection, _super);
+      __extends(Collection, _super);
 
-      function ClientFilteredCollection() {
+      function Collection() {
+        Collection.__super__.constructor.apply(this, arguments);
         this.instances = {};
       }
 
-      ClientFilteredCollection.prototype.add = function(model, silent) {
+      Collection.prototype.getAll = function() {
+        var key, value, _ref, _results;
+        _ref = this.instances;
+        _results = [];
+        for (key in _ref) {
+          value = _ref[key];
+          _results.push(value);
+        }
+        return _results;
+      };
+
+      Collection.prototype.size = function() {
+        return Object.keys(this.instances).length;
+      };
+
+      Collection.prototype.add = function(model, silent) {
         if (silent == null) {
           silent = false;
         }
@@ -1484,11 +1502,26 @@ define("underscore", (function (global) {
         }
       };
 
-      return ClientFilteredCollection;
+      Collection.prototype.remove = function(model) {
+        delete this.instances[model.clientId];
+        return this.trigger("remove", model);
+      };
+
+      return Collection;
 
     })(Events);
+    ClientFilteredCollection = (function(_super) {
+
+      __extends(ClientFilteredCollection, _super);
+
+      function ClientFilteredCollection() {
+        ClientFilteredCollection.__super__.constructor.apply(this, arguments);
+      }
+
+      return ClientFilteredCollection;
+
+    })(Collection);
     ServerSynchronisedCollection = (function(_super) {
-      var modelAdded;
 
       __extends(ServerSynchronisedCollection, _super);
 
@@ -1502,11 +1535,10 @@ define("underscore", (function (global) {
           this.url = modelType.url;
         }
         this.filteredCollections = [];
-        this.instances = {};
       }
 
       ServerSynchronisedCollection.prototype.filter = function(filter) {
-        var filteredCollection, filteredCollectionObject, model, _i, _len, _ref, _results;
+        var filteredCollection, filteredCollectionObject, key, model, _ref;
         filteredCollection = new ClientFilteredCollection;
         filteredCollectionObject = {
           collection: filteredCollection,
@@ -1514,14 +1546,47 @@ define("underscore", (function (global) {
         };
         this.filteredCollections.push(filteredCollectionObject);
         _ref = this.instances;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          model = _ref[_i];
+        for (key in _ref) {
+          model = _ref[key];
           if (filter(model)) {
-            _results.push(filteredCollection.add(model, true));
+            filteredCollection.add(model, true);
           }
         }
-        return _results;
+        return filteredCollection;
+      };
+
+      ServerSynchronisedCollection.prototype.add = function(model, silent) {
+        var filteredCollection, _i, _len, _ref,
+          _this = this;
+        if (silent == null) {
+          silent = false;
+        }
+        ServerSynchronisedCollection.__super__.add.apply(this, arguments);
+        _ref = this.filteredCollections;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          filteredCollection = _ref[_i];
+          if (filteredCollection.filter(model)) {
+            filteredCollection.collection.add(model);
+          }
+        }
+        return model.on("change", function() {
+          var matches, _j, _len1, _ref1, _results;
+          _ref1 = _this.filteredCollections;
+          _results = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            filteredCollection = _ref1[_j];
+            matches = filteredCollection.filter(model);
+            if (matches && !(filteredCollection.collection.instances[model.clientId] != null)) {
+              filteredCollection.collection.add(model, silent);
+            }
+            if (!matches && (filteredCollection.collection.instances[model.clientId] != null)) {
+              _results.push(filteredCollection.collection.remove(model));
+            } else {
+              _results.push(void 0);
+            }
+          }
+          return _results;
+        });
       };
 
       ServerSynchronisedCollection.prototype.activate = function() {
@@ -1531,7 +1596,7 @@ define("underscore", (function (global) {
           create: function(json) {
             var model;
             model = _this.modelType.load(json);
-            return _this.instances[model.clientId] = model;
+            return _this.add(model);
           },
           update: function(json) {
             return _this.modelType.load(json);
@@ -1543,46 +1608,23 @@ define("underscore", (function (global) {
           remove: function(json) {
             var model;
             model = _this.modelType.load(json);
-            return delete _this.instances[model.clientId];
+            return _this.remove(model);
           }
         };
         return Sync.connectCollection(this.url, callbackFunctions);
       };
 
-      ServerSynchronisedCollection.prototype.getAll = function() {
-        var key, value, _ref, _results;
-        _ref = this.instances;
-        _results = [];
-        for (key in _ref) {
-          value = _ref[key];
-          _results.push(value);
-        }
-        return _results;
-      };
-
-      modelAdded = function(model, silent) {
-        if (silent == null) {
-          silent = false;
-        }
-        this.instances[model.clientId] = model;
-        if (!silent) {
-          return this.trigger("add", model);
-        }
-      };
-
-      ServerSynchronisedCollection.prototype.size = function() {
-        return Object.keys(this.instances).length;
-      };
-
       return ServerSynchronisedCollection;
 
-    })(Events);
+    })(Collection);
     Model = (function(_super) {
       var addCreateCollectionFunction, addInstances, addLoadMethod, createClientId, lastClientIdUsed;
 
       __extends(Model, _super);
 
       function Model() {
+        this.update = __bind(this.update, this);
+
         var idProperty,
           _this = this;
         Model.__super__.constructor.apply(this, arguments);
@@ -1669,23 +1711,18 @@ define("underscore", (function (global) {
             property.addToJson(json, includeOnlyDirtyProperties);
           }
         }
-        return json;
+        return JSON.stringify(json);
       };
 
       Model.prototype.save = function() {
-        var json, onSuccess,
-          _this = this;
-        onSuccess = function(jsonString, successCode, somethingElse) {
-          return _this.update(JSON.parse(jsonString));
+        var callbackFunctions, json, saveFunction, url;
+        callbackFunctions = {
+          success: this.update
         };
-        this._assertUrl();
+        saveFunction = this.isNew() ? Sync.persist : Sync.update;
+        url = this.isNew() ? this.constructor.url : this.constructor.url + get("id");
         json = this.asJson();
-        $.ajax(this._getSaveUrl(), {
-          type: this._getSaveHttpMethod(),
-          data: json,
-          success: onSuccess
-        });
-        return console.log(JSON.stringify(json));
+        return saveFunction(url, json, callbackFunctions);
       };
 
       Model.prototype["delete"] = function() {
@@ -1758,24 +1795,6 @@ define("underscore", (function (global) {
           }
         }
         return ChildExtended;
-      };
-
-      Model.prototype._getSaveHttpMethod = function() {
-        if (this.isNew()) {
-          return "POST";
-        } else {
-          return "PUT";
-        }
-      };
-
-      Model.prototype._getSaveUrl = function() {
-        return this.url + (!this.isNew() ? "/" + this.get("id") : "");
-      };
-
-      Model.prototype._assertUrl = function() {
-        if (this.url == null) {
-          throw "url must be defined for model";
-        }
       };
 
       return Model;
