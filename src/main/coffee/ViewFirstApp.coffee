@@ -2,19 +2,11 @@ require ["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], ($, JQueryA
 
   viewFirst = new ViewFirst("monthView")
 
-  #Create some appointments
-
-  goToTheDentist = new Appointment()
-  goToTheDentist.set("date", new Date(2013, 2, 5))
-  goToTheDentist.set("title", "Go to the dentist")
-  goToTheDentist.save()
-
   date = new Date(2013, 3, 1)
 
   viewFirst.setNamedModel("startOfCurrentMonth", date)
 
   daysInMonth = (month, year) -> return new Date(year, month + 1, 0).getDate();
-
   monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
   dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
@@ -76,13 +68,19 @@ require ["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], ($, JQueryA
     viewFirst.bindCollection appointmentsForDay, node, ->
       eventTemplate.clone()
 
+    return appointmentsForDay
+
 
   viewFirst.addSnippet "calendar", (node) ->
 
     template = node.children()
     template.detach()
 
+    appointmentCollections = []
+
     renderCalendar = (startOfCurrentMonth) ->
+
+      allAppointments.removeFilteredCollection(appointmentCollections)
 
       node.children().detach()
 
@@ -104,7 +102,7 @@ require ["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], ($, JQueryA
         cell = currentRow.find(".#{dayName}")
         $(cell.get(0)).data("populated", true)
         appointmentsSpan = cell.find(".events")
-        bindAppointments(appointmentsSpan, new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth))
+        appointmentCollections.push bindAppointments(appointmentsSpan, new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth))
         cell.find(".date").html("<span>#{currentDayOfMonth}</span>")
 
         currentDayOfWeek++

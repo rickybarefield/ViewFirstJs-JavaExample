@@ -1453,6 +1453,12 @@ define("underscore", (function (global) {
           contentType: "application/json",
           success: callbackFunctions['success']
         });
+      },
+      "delete": function(url, callbackFunctions) {
+        return $.ajax(url, {
+          type: 'DELETE',
+          success: callbackFunctions['success']
+        });
       }
     };
     return AtmosphereSynchronization;
@@ -1464,7 +1470,9 @@ define("underscore", (function (global) {
 (function() {
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   define('ViewFirstModel',["underscore", "jquery", "Property", "ViewFirstEvents", "AtmosphereSynchronization"], function(_, $, Property, Events, Sync) {
     var ClientFilteredCollection, Collection, Model, ServerSynchronisedCollection;
@@ -1514,9 +1522,16 @@ define("underscore", (function (global) {
 
       __extends(ClientFilteredCollection, _super);
 
-      function ClientFilteredCollection() {
+      function ClientFilteredCollection(serverSyncCollection) {
+        this.serverSyncCollection = serverSyncCollection;
+        this.deactivate = __bind(this.deactivate, this);
+
         ClientFilteredCollection.__super__.constructor.apply(this, arguments);
       }
+
+      ClientFilteredCollection.prototype.deactivate = function() {
+        return this.serverSyncCollection.removeFilteredCollection(this);
+      };
 
       return ClientFilteredCollection;
 
@@ -1530,6 +1545,10 @@ define("underscore", (function (global) {
         this.url = url;
         this.activate = __bind(this.activate, this);
 
+        this.removeFilteredCollection = __bind(this.removeFilteredCollection, this);
+
+        this.filter = __bind(this.filter, this);
+
         ServerSynchronisedCollection.__super__.constructor.apply(this, arguments);
         if (!this.url) {
           this.url = modelType.url;
@@ -1539,7 +1558,7 @@ define("underscore", (function (global) {
 
       ServerSynchronisedCollection.prototype.filter = function(filter) {
         var filteredCollection, filteredCollectionObject, key, model, _ref;
-        filteredCollection = new ClientFilteredCollection;
+        filteredCollection = new ClientFilteredCollection(this);
         filteredCollectionObject = {
           collection: filteredCollection,
           filter: filter
@@ -1553,6 +1572,14 @@ define("underscore", (function (global) {
           }
         }
         return filteredCollection;
+      };
+
+      ServerSynchronisedCollection.prototype.removeFilteredCollection = function() {
+        var collections;
+        collections = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        return this.filteredCollections = _.filter(this.filteredCollections, function(collObj) {
+          return __indexOf.call(collections, collObj) >= 0;
+        });
       };
 
       ServerSynchronisedCollection.prototype.add = function(model, silent) {
@@ -1618,7 +1645,7 @@ define("underscore", (function (global) {
 
     })(Collection);
     Model = (function(_super) {
-      var addCreateCollectionFunction, addInstances, addLoadMethod, createClientId, lastClientIdUsed;
+      var addCreateCollectionFunction, addInstances, addLoadMethod, createClientId, ensureModelValid, lastClientIdUsed;
 
       __extends(Model, _super);
 
@@ -1711,7 +1738,7 @@ define("underscore", (function (global) {
             property.addToJson(json, includeOnlyDirtyProperties);
           }
         }
-        return JSON.stringify(json);
+        return json;
       };
 
       Model.prototype.save = function() {
@@ -1720,21 +1747,19 @@ define("underscore", (function (global) {
           success: this.update
         };
         saveFunction = this.isNew() ? Sync.persist : Sync.update;
-        url = this.isNew() ? this.constructor.url : this.constructor.url + get("id");
-        json = this.asJson();
+        url = this.isNew() ? this.constructor.url : this.constructor.url + "/" + this.get("id");
+        json = JSON.stringify(this.asJson());
         return saveFunction(url, json, callbackFunctions);
       };
 
       Model.prototype["delete"] = function() {
-        var onSuccess,
-          _this = this;
-        onSuccess = function(jsonString, successCode, somethingElse) {
-          return console.log("TODO will need to trigger an event");
+        var callbackFunctions;
+        callbackFunctions = {
+          success: function() {
+            return console.log("TODO will need to trigger an event");
+          }
         };
-        return $.ajax(this._getSaveUrl(), {
-          type: "DELETE",
-          success: onSuccess
-        });
+        return Sync["delete"](this.constructor.url + "/" + this.get("id"), callbackFunctions);
       };
 
       Model.prototype.update = function(json, clean) {
@@ -1771,8 +1796,15 @@ define("underscore", (function (global) {
         };
       };
 
+      ensureModelValid = function(Model) {
+        if (!Model.url) {
+          throw "url must be set as a static property";
+        }
+      };
+
       Model.extend = function(Child) {
         var ChildExtended, Surrogate, key;
+        ensureModelValid(Child);
         ChildExtended = function() {
           Model.apply(this, arguments);
           Child.apply(this, arguments);

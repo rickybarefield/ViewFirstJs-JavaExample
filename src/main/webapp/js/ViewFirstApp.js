@@ -1,12 +1,8 @@
 (function() {
 
   require(["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], function($, JQueryAtmoshphere, ViewFirst, Appointment) {
-    var allAppointments, bindAppointments, date, dayNames, daysInMonth, goToTheDentist, monthNames, viewFirst;
+    var allAppointments, bindAppointments, date, dayNames, daysInMonth, monthNames, viewFirst;
     viewFirst = new ViewFirst("monthView");
-    goToTheDentist = new Appointment();
-    goToTheDentist.set("date", new Date(2013, 2, 5));
-    goToTheDentist.set("title", "Go to the dentist");
-    goToTheDentist.save();
     date = new Date(2013, 3, 1);
     viewFirst.setNamedModel("startOfCurrentMonth", date);
     daysInMonth = function(month, year) {
@@ -70,16 +66,19 @@
         appDate = appointment.get("date");
         return (appDate != null) && appDate.getTime() === date.getTime();
       });
-      return viewFirst.bindCollection(appointmentsForDay, node, function() {
+      viewFirst.bindCollection(appointmentsForDay, node, function() {
         return eventTemplate.clone();
       });
+      return appointmentsForDay;
     };
     viewFirst.addSnippet("calendar", function(node) {
-      var renderCalendar, template;
+      var appointmentCollections, renderCalendar, template;
       template = node.children();
       template.detach();
+      appointmentCollections = [];
       renderCalendar = function(startOfCurrentMonth) {
         var appointmentsSpan, cell, currentDayOfMonth, currentDayOfWeek, currentRow, dayName, daysInThisMonth;
+        allAppointments.removeFilteredCollection(appointmentCollections);
         node.children().detach();
         daysInThisMonth = daysInMonth(startOfCurrentMonth.getMonth(), startOfCurrentMonth.getFullYear());
         currentRow = template.clone();
@@ -96,7 +95,7 @@
           cell = currentRow.find("." + dayName);
           $(cell.get(0)).data("populated", true);
           appointmentsSpan = cell.find(".events");
-          bindAppointments(appointmentsSpan, new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth));
+          appointmentCollections.push(bindAppointments(appointmentsSpan, new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth)));
           cell.find(".date").html("<span>" + currentDayOfMonth + "</span>");
           currentDayOfWeek++;
           currentDayOfMonth++;
