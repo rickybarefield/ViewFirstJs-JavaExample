@@ -10,6 +10,7 @@
     <properties>
         <spring-version>3.2.1.RELEASE</spring-version>
         <atmosphere-version>1.0.11</atmosphere-version>
+        <glassfish-home>/opt/glassfish4/glassfish</glassfish-home>
     </properties>
 
     <build>
@@ -21,11 +22,6 @@
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.0</version>
             </plugin>
             <plugin>
                 <groupId>com.github.iron9light</groupId>
@@ -43,10 +39,49 @@
                     <outputDir>${basedir}/src/main/webapp/js</outputDir>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.glassfish.maven.plugin</groupId>
+                <artifactId>maven-glassfish-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <echo>true</echo>
+                    <debug>true</debug>
+                    <glassfishDirectory>${glassfish-home}</glassfishDirectory>
+                    <domain>
+                        <name>${project.artifactId}</name>
+                        <httpPort>8080</httpPort>
+                        <adminPort>4848</adminPort>
+                    </domain>
+                    <components>
+                        <component>
+                            <name>${project.artifactId}</name>
+                            <artifact>${project.build.directory}/${project.build.finalName}.war</artifact>
+                        </component>
+                    </components>
+                    <user>admin</user>
+                    <adminPassword>password</adminPassword>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.0</version>
+            </plugin>
+
         </plugins>
     </build>
 
     <dependencies>
+
+        <!-- Websockets JSR 356 -->
+        <dependency>
+            <groupId>org.glassfish.tyrus</groupId>
+            <artifactId>tyrus-server</artifactId>
+            <version>1.1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -73,20 +108,36 @@
             <version>1.2.0.RELEASE</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.6</version>
+        </dependency>
+        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jpa_2.0_spec</artifactId>
+            <version>1.1</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.0-api</artifactId>
             <version>1.0.0.Final</version>
         </dependency>
-        <dependency>
+-->
+        <!--dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.1.10.Final</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>

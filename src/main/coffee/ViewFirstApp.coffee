@@ -1,6 +1,8 @@
 require ["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], ($, JQueryAtmoshphere, ViewFirst, Appointment) ->
 
+  ###
   viewFirst = new ViewFirst("monthView")
+
 
   date = new Date(2013, 3, 1)
 
@@ -115,9 +117,14 @@ require ["jquery", "jquery.atmosphere", "ViewFirst", "Appointment"], ($, JQueryA
 
     return node
 
+  ###
+
   $ ->
 
-    viewFirst.initialize()
+    #viewFirst.initialize()
 
     #Until routing is working...
-    viewFirst.render("main")
+    #viewFirst.render("main")
+    #Temp websocket code
+    websocket = new WebSocket("ws://localhost:8080/viewfirstjs-java-example-0.0.1-SNAPSHOT/websocket");
+

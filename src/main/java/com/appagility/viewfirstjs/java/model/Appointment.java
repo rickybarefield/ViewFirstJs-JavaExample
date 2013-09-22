@@ -4,6 +4,8 @@ import com.appagility.viewfirstjs.java.model.listeners.BroadcastEntityListener;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,6 +14,8 @@ import java.util.Date;
 public class Appointment extends Identifiable
 {
     private String title;
+
+    @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
     public String getTitle()
