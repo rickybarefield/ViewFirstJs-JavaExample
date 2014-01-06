@@ -8,13 +8,25 @@
     <name>ViewFirstJs Java Example</name>
 
     <properties>
-        <spring-version>3.2.1.RELEASE</spring-version>
-        <atmosphere-version>1.0.11</atmosphere-version>
         <glassfish-home>/opt/glassfish4/glassfish</glassfish-home>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <targetPath>js</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <includes>
+                                <include>ViewFirstJavaExample.js</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -36,10 +48,31 @@
                 </executions>
                 <configuration>
                     <srcDir>${basedir}/src/main/coffee</srcDir>
-                    <outputDir>${basedir}/src/main/webapp/js</outputDir>
+                    <outputDir>${project.build.directory}/dist/lib</outputDir>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="building">
+                                <exec executable="npm" dir="${project.build.directory}/dist/" failonerror="true">
+                                    <arg line="link ViewFirstJs" />
+                                </exec>
+                                <exec executable="browserify" dir="${project.build.directory}/dist/lib" failonerror="true">
+                                    <arg line="ViewFirstApp.js --outfile ../../ViewFirstJavaExample.js --external underscore --external jquery" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.glassfish.maven.plugin</groupId>
                 <artifactId>maven-glassfish-plugin</artifactId>
@@ -74,39 +107,6 @@
     </build>
 
     <dependencies>
-
-        <!-- Websockets JSR 356 -->
-        <dependency>
-            <groupId>org.glassfish.tyrus</groupId>
-            <artifactId>tyrus-server</artifactId>
-            <version>1.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
-            <version>1.2.0.RELEASE</version>
-        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -117,61 +117,10 @@
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jpa_2.0_spec</artifactId>
-            <version>1.1</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <!--
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.0.Final</version>
-        </dependency>
--->
-        <!--dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.1.10.Final</version>
-        </dependency-->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.2.8</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-xc</artifactId>
-            <version>1.9.12</version>
-        </dependency>
-
-        <!-- Atmosphere -->
-        <dependency>
-            <groupId>org.atmosphere</groupId>
-            <artifactId>atmosphere-runtime</artifactId>
-            <version>${atmosphere-version}</version>
+            <groupId>com.appagility.scrud-java-server</groupId>
+            <artifactId>scrud-java-server</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

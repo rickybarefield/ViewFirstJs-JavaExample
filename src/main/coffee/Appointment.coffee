@@ -1,9 +1,10 @@
-define ["ViewFirst"], (ViewFirst) ->
+ViewFirst = require("ViewFirstJs")
 
-  ViewFirst.Model.extend class Appointment
+module.exports = ViewFirst.Model.extend class Appointment
 
-    @url: "appointments"
+    @type: "appointment"
 
     constructor: ->
+      @createProperty("id", Long)
       @createProperty("title", String)
       @createProperty("date", Date)
