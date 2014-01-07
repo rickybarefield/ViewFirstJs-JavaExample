@@ -1,9 +1,7 @@
 ViewFirst = require ("ViewFirstJs")
 Appointment = require("./Appointment")
 
-###
-viewFirst = new ViewFirst("monthView")
-
+viewFirst = new ViewFirst("ws://localhost:8080/viewfirstjs-java-example-0.0.1-SNAPSHOT/websocket")
 
 date = new Date(2013, 3, 1)
 
@@ -18,14 +16,14 @@ allAppointments.activate()
 
 viewFirst.addSnippet "createAppointment", (node) ->
 
-  currentAppointment = new Appointment()
+  currentAppointment = new viewFirst.Appointment()
 
   doBind = -> viewFirst.bindInputs node, currentAppointment
 
   node.find("button").click (event) ->
     event.preventDefault()
     currentAppointment.save()
-    currentAppointment = new Appointment()
+    currentAppointment = new viewFirst.Appointment()
     doBind()
     return false
 
@@ -118,14 +116,7 @@ viewFirst.addSnippet "calendar", (node) ->
 
   return node
 
-###
-
 $ ->
 
-  #viewFirst.initialize()
-
-  #Until routing is working...
-  #viewFirst.render("main")
-  #Temp websocket code
-  websocket = new WebSocket("ws://localhost:8080/viewfirstjs-java-example-0.0.1-SNAPSHOT/websocket");
-
+  viewFirst.initialize(-> console.log("initialized"))
+  viewFirst.render("main")
