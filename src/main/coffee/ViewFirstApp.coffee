@@ -14,20 +14,24 @@ dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "s
 allAppointments = viewFirst.Appointment.createCollection()
 global.allAppointments = allAppointments
 
+currentAppointment = new viewFirst.Appointment()
+viewFirst.setNamedModel("currentAppointment", currentAppointment)
+
 viewFirst.addSnippet "createAppointment", (node) ->
 
-  currentAppointment = new viewFirst.Appointment()
 
-  doBind = -> viewFirst.bindInputs node, currentAppointment
+  doBind = (model) ->
+
+    viewFirst.bindInputs node, model
 
   node.find("button").click (event) ->
     event.preventDefault()
-    currentAppointment.save()
-    currentAppointment = new viewFirst.Appointment()
-    doBind()
+    viewFirst.getNamedModel("currentAppointment").save()
+    viewFirst.setNamedModel("currentAppointment",  new viewFirst.Appointment())
     return false
 
-  doBind()
+  doBind(viewFirst.getNamedModel("currentAppointment"))
+  viewFirst.onNamedModelChange("currentAppointment", (old, newModel) -> doBind(newModel))
 
   return node
 
@@ -66,8 +70,12 @@ bindAppointments = (node, date) ->
      appDate = appointment.get("date")
      return appDate? && appDate.getTime() == date.getTime()
 
-  viewFirst.bindCollection appointmentsForDay, node, ->
-    eventTemplate.clone()
+  viewFirst.bindCollection appointmentsForDay, node, (appointment) ->
+    events = eventTemplate.clone()
+    events.click (event) ->
+      event.preventDefault()
+      viewFirst.setNamedModel("currentAppointment", appointment)
+      return false
 
   return appointmentsForDay
 
@@ -101,10 +109,21 @@ viewFirst.addSnippet "calendar", (node) ->
 
       dayName = dayNames[currentDayOfWeek]
       cell = currentRow.find(".#{dayName}")
-      $(cell.get(0)).data("populated", true)
-      appointmentsSpan = cell.find(".events")
-      appointmentCollections.push bindAppointments(appointmentsSpan, new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth))
-      cell.find(".date").html("<span>#{currentDayOfMonth}</span>")
+
+      do ->
+
+        cellsDate = new Date(startOfCurrentMonth.getFullYear(), startOfCurrentMonth.getMonth(), currentDayOfMonth)
+
+        cell.click ->
+
+          appointment = new viewFirst.Appointment()
+          appointment.set("date", cellsDate)
+          viewFirst.setNamedModel("currentAppointment", appointment)
+
+        $(cell.get(0)).data("populated", true)
+        appointmentsSpan = cell.find(".events")
+        appointmentCollections.push bindAppointments(appointmentsSpan, cellsDate)
+        cell.find(".date").html("<span>#{currentDayOfMonth}</span>")
 
       currentDayOfWeek++
       currentDayOfMonth++
