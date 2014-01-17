@@ -1,9 +1,13 @@
 package com.appagility.viewfirstjs.java.resources;
 
 import com.appagility.j2ee.websocket.dispatcher.Id;
+import com.appagility.j2ee.websocket.dispatcher.WebSocketResource;
+import com.appagility.viewfirstjs.java.repositories.AppointmentRepository;
+import com.appagility.viewfirstjs.java.repositories.AppointmentRepositoryFactory;
 
 import java.util.Date;
 
+@WebSocketResource(name = "Appointment", repositoryFactory = AppointmentRepositoryFactory.class)
 public class Appointment
 {
     private Long id;

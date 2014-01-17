@@ -2,9 +2,9 @@ ViewFirst = require("ViewFirstJs")
 
 module.exports = ViewFirst.Model.extend class Appointment
 
-    @type: "appointment"
+    @type: "Appointment"
 
     constructor: ->
-      @createProperty("id", Long)
+      @createProperty("id", Number)
       @createProperty("title", String)
       @createProperty("date", Date)

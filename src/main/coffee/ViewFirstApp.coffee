@@ -11,8 +11,8 @@ daysInMonth = (month, year) -> return new Date(year, month + 1, 0).getDate();
 monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
 dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-allAppointments = Appointment.createCollection()
-allAppointments.activate()
+allAppointments = viewFirst.Appointment.createCollection()
+global.allAppointments = allAppointments
 
 viewFirst.addSnippet "createAppointment", (node) ->
 
@@ -118,5 +118,8 @@ viewFirst.addSnippet "calendar", (node) ->
 
 $ ->
 
-  viewFirst.initialize(-> console.log("initialized"))
-  viewFirst.render("main")
+  onceInitialized = ->
+    allAppointments.activate()
+    viewFirst.render("main")
+
+  viewFirst.initialize(onceInitialized)
